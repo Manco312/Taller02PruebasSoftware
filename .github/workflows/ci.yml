@@ -1,0 +1,47 @@
+name: CI-Pipeline
+ 
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      # 1. Checkout
+      - name: Checkout código
+        uses: actions/checkout@v4
+ 
+      # 2. Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+ 
+      # 3. Instalar dependencias
+      - name: Install deps
+        run: pip install pylint pytest && pip install -r requirements.txt
+ 
+      # 4. Análisis estático
+      - name: Lint (pylint)
+        run: pylint *.py || true
+ 
+      # 5. Pruebas unitarias (con stub / sin API real)
+      - name: Run unit tests (stub)
+        run: pytest test_unit_with_stub.py -v
+ 
+      # 6. Pruebas unitarias (con API real)
+      - name: Run unit tests (real API)
+        run: pytest test_unit_real_api.py -v
+ 
+      # 7. Pruebas de integración (con fake)
+      - name: Run integration tests (fake)
+        run: pytest test_integration_with_fake.py -v
+ 
+      # 8. Pruebas de integración (API real)
+      - name: Run integration tests (real API)
+        run: pytest test_integration_real_api.py -v
+ 
